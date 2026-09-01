@@ -1,0 +1,133 @@
+/* «Стекло на хроме» для ПК-дашборда (2026-08-08, выбор пользователя по
+ * макетам Mini App — вариант C).
+ *
+ * Стеклянным становится только ХРОМ — топбар, навигация, пилюли управления.
+ * Карточки с данными остаются плотными наклейками B6: балл обязан читаться
+ * первым, и терять контраст данных ради эффекта нельзя. Лайм и розовый
+ * по-прежнему несут смысл, стекло — материал, а не третий акцент.
+ *
+ * Файл грузится последним в десктопном index.html. В бандле Mini App поверх
+ * него встаёт miniapp.css (полное стекло) — порядок подключения это стережёт.
+ */
+
+/* Свечение фона тише мобильного: на большом экране цвет в полную силу
+ * спорил бы с наклейками. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(52vh 52vh at 85% 0%, rgba(62, 155, 199, 0.1), transparent 65%),
+    radial-gradient(46vh 46vh at 6% 96%, rgba(199, 240, 74, 0.07), transparent 60%),
+    radial-gradient(40vh 40vh at 55% 50%, rgba(255, 93, 162, 0.045), transparent 62%),
+    var(--bg);
+}
+
+body {
+  background: transparent;
+}
+
+/* --- топбар: фирменный блик по нижней кромке ---
+ * Заливка 0.78, а не 0.55: сквозь более прозрачное стекло «горели»
+ * лаймовые наклейки списка. Вместо второй светлой линии — мягкая тень:
+ * она растворяет нижнюю кромку, чтобы панель не обрывалась в пиксель. */
+
+.topbar {
+  background: rgba(18, 19, 22, 0.78);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 28px rgba(10, 11, 13, 0.35);
+}
+
+/* Переход по якорю не должен прятать цель под липкой шапкой. */
+@media (min-width: 761px) {
+  html {
+    scroll-padding-top: 88px;
+  }
+}
+
+/* Девять отдельных пилюль читались частоколом — навигация собрана в ОДИН
+ * стеклянный рельс, внутри которого живёт лаймовая активная пилюля.
+ * Тот же приём, что у .switch: рамка у контейнера, а не у каждого пункта. */
+.topbar__row {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+/* Пункты не прячутся в скрытую прокрутку (она обрезала «Сохранённое» и
+ * «Журнал» посреди буквы и была недоступна мыши) — в тесном окне рельс
+ * переносит пилюли на вторую строку. Радиус фиксированный: стадион 999px
+ * на двухстрочном рельсе выталкивал бы угловые пилюли за скругление.
+ * Собственного blur у рельса нет: он лежит на уже размытом стекле шапки,
+ * второй слой жёг GPU впустую. */
+.nav {
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--r-sticker);
+  background: rgba(27, 29, 33, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.nav a {
+  flex: none;
+  border: 0;
+  background: transparent;
+}
+
+.nav a:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav a[aria-current="page"] {
+  color: var(--lime-ink);
+  background: var(--lime);
+}
+
+/* Узкий экран: вордмарк и рельс не помещаются на одной строке —
+ * навигация переезжает на отдельную. Шапка перестаёт липнуть:
+ * многострочный рельс съедал бы пол-экрана на каждой прокрутке. */
+@media (max-width: 760px) {
+  .topbar {
+    position: static;
+  }
+
+  .topbar__row {
+    flex-wrap: wrap;
+  }
+}
+
+/* --- пилюли управления: та же стеклянная кромка, без размытия ---
+ * Blur на каждой мелкой пилюле стоил бы GPU заметно дороже, чем даёт глазу. */
+
+.switch,
+.regions__pill,
+.controls select,
+.pager button,
+.search__input,
+.addtrend input {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(27, 29, 33, 0.55);
+}
+
+/* Слабый GPU или старый браузер: хром честно возвращается к плотному B6. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body::before {
+    content: none;
+  }
+
+  body {
+    background: var(--bg);
+  }
+
+  .topbar {
+    background: linear-gradient(var(--bg) 72%, transparent);
+    border-bottom: 0;
+    box-shadow: none;
+  }
+}
