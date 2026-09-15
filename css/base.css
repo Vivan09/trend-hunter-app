@@ -1,0 +1,221 @@
+/* Сброс, сетка страницы и навигация. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color-scheme: dark;
+  /* clip, а не hidden: hidden сделал бы html скролл-контейнером
+     и сломал position: sticky у шапки. */
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+ul,
+ol,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Задержки глушатся вместе с длительностями: иначе лесенка выродится
+   в задержку без анимации и контент будет проступать рывками. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* --- каркас --- */
+
+.shell {
+  width: min(100% - 32px, var(--shell));
+  margin-inline: auto;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  /* Выше выпадашки поиска (z-index: 20): при прокрутке подсказки
+     уходят под шапку, а не поверх неё. */
+  z-index: 30;
+  padding: 18px 0 14px;
+  background: linear-gradient(var(--bg) 72%, transparent);
+}
+
+.topbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+/* Вордмарк — наклейка: тот же наклонный лаймовый элемент, что несёт балл
+ * в списке. Держит идентичность в обоих хромах (ПК и Mini App), при
+ * наведении выпрямляется — как настоящая наклейка под пальцем. Маленький
+ * намеренно: громким в интерфейсе остаётся только балл (правило B6). */
+.wordmark {
+  display: inline-block;
+  padding: 4px 12px 6px;
+  border-radius: 10px;
+  background: var(--lime);
+  color: var(--lime-ink);
+  transform: rotate(var(--tilt));
+  transition: transform var(--t-base) var(--ease);
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-stretch: 88%;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.wordmark:hover,
+.wordmark:focus-visible {
+  transform: rotate(0deg);
+}
+
+.wordmark span {
+  color: inherit;
+  opacity: 0.55;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nav a {
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  color: var(--dim);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav a:hover {
+  color: var(--ink);
+  background: var(--card);
+}
+
+.nav a[aria-current="page"] {
+  color: var(--lime-ink);
+  background: var(--lime);
+}
+
+main {
+  padding: 8px 0 72px;
+}
+
+/* Фокус ставится программно при смене раздела — рамку вокруг всей страницы
+   рисовать не нужно, но сам фокус нужен, чтобы чтение с клавиатуры начиналось
+   с нового содержимого. */
+#view:focus,
+#view:focus-visible {
+  outline: none;
+}
+
+.view-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.view-title {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-stretch: 78%;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+
+.runline {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.runline b {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+/* Видно только скринридеру: статус загрузки, когда на экране заглушка. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
