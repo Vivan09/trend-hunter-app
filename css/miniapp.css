@@ -1,0 +1,398 @@
+/* Скин Mini App «Жидкое стекло» (2026-08-08, выбор пользователя по макетам).
+ *
+ * Файл живёт ТОЛЬКО в бандле Mini App: сборка врезает его в index.html
+ * последним, десктопный дашборд его не видит. Правило палитры B6 не
+ * нарушается: лайм и розовый по-прежнему несут смысл (свободна/занята),
+ * стекло — материал поверхностей, а не третий акцент.
+ *
+ * Устройство: поверхности становятся полупрозрачными переопределением
+ * ТОКЕНОВ (--card и др.), а размытие добавляется адресно — только крупным
+ * панелям и хрому. Blur на каждой пилюле сжёг бы батарею телефона.
+ */
+
+:root {
+  --card: rgba(30, 32, 38, 0.52);
+  --card-2: rgba(26, 27, 32, 0.45);
+  /* Третья поверхность тоже становится стеклом: непрозрачный хекс
+     выглядел бы плотным островом внутри полупрозрачной карточки. */
+  --card-3: rgba(32, 35, 41, 0.55);
+  --line: rgba(255, 255, 255, 0.11);
+  --skel-tint: rgba(38, 41, 48, 0.55);
+  /* Тап-зоны и вертикальный ритм чуть плотнее десктопа */
+  --pad: 16px;
+  --gap: 12px;
+}
+
+/* Цветное свечение под стеклом: лайм/розовый/синий из палитры графика.
+ * Отдельный фиксированный слой, а не background-attachment: fixed —
+ * тот на мобильных WebView дёргается при прокрутке. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(42vh 42vh at 15% 8%, rgba(199, 240, 74, 0.16), transparent 62%),
+    radial-gradient(48vh 48vh at 92% 30%, rgba(255, 93, 162, 0.13), transparent 64%),
+    radial-gradient(56vh 56vh at 40% 100%, rgba(62, 155, 199, 0.16), transparent 62%),
+    var(--bg);
+}
+
+body {
+  background: transparent;
+}
+
+/* --- стеклянные поверхности: крупные панели --- */
+
+.find,
+.tile,
+.panel,
+.empty,
+.deckcard,
+.trendhead,
+.chart,
+.market,
+.geo,
+.videocard,
+.mention,
+.spark {
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--line);
+  /* Верхняя кромка ловит свет — фирменный блик жидкого стекла */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* --- хром: топбар не липнет, навигацию заменяет нижний таб-бар ---
+ *
+ * Липкое стекло сверху резало прокручиваемый заголовок полупрозрачной
+ * кромкой («некрасиво обрезается»), а держать его незачем: навигация
+ * внизу. Панель обычная, уезжает вместе со страницей. Отступ сверху —
+ * безопасная зона Telegram (шапка клиента, чёлка телефона). */
+
+.topbar {
+  position: static;
+  padding: calc(
+      10px + var(--tg-content-safe-area-inset-top, var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)))
+    )
+    0 8px;
+  background: transparent;
+  border-bottom: 0;
+  /* Сбрасываем ВСЁ стекло chromeglass.css (он остаётся в бандле ниже
+     по каскаду): иначе невидимая панель размывала фон и рисовала
+     волосок-тень — «обрубленный прямоугольник» на градиенте. */
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+html {
+  /* Шапка здесь не липнет — десктопный запас для якорей не нужен. */
+  scroll-padding-top: 8px;
+}
+
+.topbar__row {
+  flex-wrap: nowrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Когда обновлены данные — главный вопрос к read-only приложению */
+.topbar__data {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-stretch: 80%;
+  white-space: nowrap;
+  color: var(--dim);
+  padding: 6px 11px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: rgba(27, 29, 33, 0.45);
+  /* На 320px вордмарк + чип шире экрана: чип уступает и обрезается
+     многоточием, а не распирает страницу. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Верхняя навигация на телефоне вне досягаемости большого пальца — её
+ * заменяет таб-бар снизу (строит js/miniapp.js). Девять пилюль сверху
+ * к тому же занимали четверть экрана. */
+.nav {
+  display: none;
+}
+
+/* --- нижний таб-бар: главные разделы под большим пальцем --- */
+
+.tabbar {
+  position: fixed;
+  inset: auto 10px
+    calc(10px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))) 10px;
+  z-index: 30;
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 22px;
+  background: rgba(24, 25, 30, 0.62);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 12px 30px rgba(0, 0, 0, 0.45);
+}
+
+.tabbar a,
+.tabbar__more {
+  flex: 1;
+  min-height: 46px; /* тап-зона ≥ 44px */
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-stretch: 80%;
+  color: var(--dim);
+  /* Подпись в одну строку всегда: перенос «Кандидаты» на вторую строку
+     поднял бы высоту панели, под которую посчитаны отступы main и листа. */
+  white-space: nowrap;
+}
+
+.tabbar .is-active {
+  color: var(--lime-ink);
+  background: rgba(199, 240, 74, 0.9);
+}
+
+.tabbar__more.is-active {
+  color: var(--lime);
+  background: rgba(199, 240, 74, 0.16);
+}
+
+/* Лист «Ещё»: остальные разделы над таб-баром, тем же стеклом */
+
+/* display: grid ниже перебил бы UA-правило для [hidden] — прячем явно */
+.tabsheet[hidden] {
+  display: none;
+}
+
+.tabsheet {
+  position: fixed;
+  inset: auto 10px
+    calc(76px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))) 10px;
+  z-index: 29;
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 22px;
+  background: rgba(24, 25, 30, 0.72);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--line);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 12px 30px rgba(0, 0, 0, 0.45);
+}
+
+.tabsheet a {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 14px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-stretch: 80%;
+  color: var(--ink);
+}
+
+.tabsheet a.is-active {
+  color: var(--lime-ink);
+  background: rgba(199, 240, 74, 0.9);
+}
+
+/* Контент не должен прятаться под таб-баром */
+main {
+  padding-bottom: calc(
+    96px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))
+  );
+}
+
+/* --- наклейка балла: стеклянный чип со свечением цвета вердикта --- */
+
+.sticker {
+  background: rgba(199, 240, 74, 0.14);
+  color: var(--lime);
+  border: 1px solid rgba(199, 240, 74, 0.42);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 16px rgba(199, 240, 74, 0.45);
+}
+
+.sticker--taken {
+  background: rgba(255, 93, 162, 0.14);
+  color: var(--pink);
+  border-color: rgba(255, 93, 162, 0.42);
+  text-shadow: 0 0 16px rgba(255, 93, 162, 0.45);
+}
+
+.sticker--unknown {
+  background: var(--card-2);
+  color: var(--dim);
+  border-color: var(--line);
+  text-shadow: none;
+}
+
+/* Подписи внутри наклейки наследуют цвет чипа, а не тёмные чернила
+ * сплошной заливки. */
+.sticker__label,
+.sticker__band,
+.sticker__world {
+  color: inherit;
+  opacity: 0.75;
+}
+
+/* --- мелкий хром без размытия: только прозрачность --- */
+
+.switch,
+.regions__pill,
+.controls select,
+.pager button,
+.addtrend input {
+  border: 1px solid var(--line);
+}
+
+/* Прокрутка широкой таблицы регионов переехала в components.css:
+ * она нужна обоим хромам, а не только Mini App. */
+
+/* --- эргономика пальцев: управление в один ряд, листается вбок --- */
+
+/* Переключатель списков: подписи не ломаются на три строки внутри
+ * пилюли — ряд прокручивается пальцем, полускрытая кнопка на краю
+ * сама говорит «листни». */
+.switch {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.switch::-webkit-scrollbar {
+  display: none;
+}
+
+.switch button {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Чипы регионов: одна строка с растворением у правого края вместо
+ * рваного переноса. Запас padding-right пуст, когда всё помещается, —
+ * маске тогда нечего гасить. */
+.regions {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-right: 20px;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
+}
+
+.regions::-webkit-scrollbar {
+  display: none;
+}
+
+.regions__label,
+.regions__pill {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Формы записи не рендерятся вовсе — это решает isReadOnly() в js/api.js,
+ * подменяемом сборкой; CSS их не прячет. */
+
+/* Кнопки внешней проверки — полноценная тап-зона ≥ 44px */
+.checklink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 14px;
+}
+
+/* Фильтры парами во всю ширину: цель крупнее, сетка ровнее */
+.controls__field {
+  flex: 1 1 40%;
+}
+
+.controls select {
+  width: 100%;
+}
+
+/* Подводка списка — подпись, а не абзац: до первой карточки и так
+ * целый экран управления */
+#list-hint {
+  font-size: var(--step--1);
+  color: var(--dim);
+}
+
+/* Вертикальный ритм плотнее десктопного: экран короткий */
+.view-head {
+  margin-bottom: 14px;
+}
+
+.section {
+  margin-top: 26px;
+}
+
+/* --- телефонная вёрстка --- */
+
+@media (max-width: 720px) {
+  .shell {
+    width: calc(100% - 24px);
+  }
+
+  .view-title {
+    font-size: var(--step-2);
+  }
+}
+
+/* --- пальцы, а не курсор --- */
+
+.controls select,
+.pager button,
+.switch button,
+.regions__pill {
+  min-height: 44px;
+}
+
+/* Шрифт полей не меньше 16px: иначе iOS при фокусе зумит всю страницу */
+.search__input,
+.addtrend input {
+  font-size: 16px;
+}
+
+/* Слабый GPU или официальный клиент без поддержки: стекло честно
+ * деградирует в плотные карточки B6 — данные важнее эффекта. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  /* Топбара в списке нет: он и в стекле прозрачный, заливать его
+   * карточным цветом поверх градиента страницы нельзя. */
+  .find,
+  .tile,
+  .panel,
+  .empty,
+  .deckcard,
+  .trendhead,
+  .chart,
+  .market,
+  .geo,
+  .videocard,
+  .mention,
+  .spark {
+    background: #1b1d21;
+  }
+}
