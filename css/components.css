@@ -1,0 +1,949 @@
+/* Наклейка, карточка-находка, переключатели, плитки.
+ *
+ * Наклейка — единственный громкий элемент интерфейса. Всё остальное намеренно
+ * тихое: если кричать будет ещё что-то, балл перестанет читаться первым.
+ */
+
+/* --- наклейка --- */
+
+.sticker {
+  display: inline-grid;
+  place-items: center;
+  gap: 0;
+  min-width: 74px;
+  padding: 10px 14px 12px;
+  border-radius: var(--r-sticker);
+  transform: rotate(var(--tilt));
+  background: var(--lime);
+  color: var(--lime-ink);
+  text-align: center;
+}
+
+.sticker--taken {
+  background: var(--pink);
+  color: var(--pink-ink);
+}
+
+.sticker--unknown {
+  background: var(--card-2);
+  color: var(--dim);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.sticker__value {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 800;
+  font-stretch: 80%;
+  line-height: 1;
+}
+
+.sticker__label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-stretch: 78%;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+/* Деление шкалы словом, а не цветом: цвет наклейки уже занят под свободу
+   ниши, и второй смысл на нём означал бы, что не читается ни один. */
+.sticker__band {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-stretch: 78%;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+/* Всемирный балл под региональным — тихая строка сравнения, не второй балл.
+   Без капса: капс мелким кеглем прочитался бы как ещё одно деление шкалы,
+   а это другая величина. */
+.sticker__world {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-stretch: 78%;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+}
+
+.sticker--lg {
+  min-width: 108px;
+  padding: 16px 20px 18px;
+}
+
+.sticker--lg .sticker__value {
+  font-size: clamp(2.6rem, 2rem + 2vw, 3.6rem);
+}
+
+/* --- карточка-находка --- */
+
+.finds {
+  display: grid;
+  gap: var(--gap);
+}
+
+.find {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--gap);
+  align-items: start;
+  padding: var(--pad) var(--pad) 16px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.find:hover,
+.find:focus-within {
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px #2f323a;
+}
+
+.find--taken {
+  background: var(--card-2);
+}
+
+.find__name {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 800;
+  font-stretch: 76%;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+/* Оверлей делает кликабельной всю карточку списка (.find — ссылка внутри
+   неё же). В колоде тот же класс .find__name висит на <h2>, заголовок там
+   не ссылка, и перекрывать нечего — сужаем селектор до <a>. */
+a.find__name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-card);
+}
+
+.find__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.find__about {
+  margin-top: 10px;
+  max-width: 62ch;
+  color: var(--dim);
+}
+
+/* --- метки --- */
+
+.tag {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--card-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.tag--free {
+  color: var(--lime);
+}
+
+.tag--taken {
+  color: var(--pink);
+}
+
+.tag--warn {
+  color: #e8c15a;
+}
+
+/* --- кнопки внешней проверки (Google Trends / Google Play) --- */
+
+.checklinks {
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* position: relative не косметика: карточку списка накрывает оверлей
+   a.find__name::after, и непозиционированная ссылка под ним некликабельна.
+   Позиционированный элемент, идущий в дереве позже, рисуется поверх. */
+.checklink {
+  position: relative;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.checklink:hover,
+.checklink:focus-visible {
+  color: var(--ink);
+  border-color: var(--lime);
+}
+
+/* --- карточка своей игры («Мои игры») --- */
+
+.game {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.game__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.game__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.game__delta {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--lime);
+}
+
+/* Кнопка в ряду ссылок: наследование шрифта возвращает ей вид .checklink —
+   у <button> свой шрифт из таблицы браузера. */
+.game__remove {
+  font: inherit;
+  font-family: var(--font-mono);
+  background: none;
+  cursor: pointer;
+  color: var(--dim);
+}
+
+.game__remove:hover {
+  border-color: var(--pink);
+  color: var(--ink);
+}
+
+/* --- полоса пяти показателей --- */
+
+.scorebar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.metric {
+  display: grid;
+  gap: 2px;
+  min-width: 72px;
+}
+
+.metric__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-stretch: 78%;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+
+.metric__value {
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  font-stretch: 82%;
+  color: var(--ink);
+}
+
+.metric__value--none {
+  color: var(--mut);
+}
+
+/* Сырое число под баллом: шкала спроса логарифмическая, и «19 подсказок»
+   объясняет «84» лучше любой подписи. */
+.metric__note {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-stretch: 78%;
+  color: var(--mut);
+}
+
+/* --- переключатель списков --- */
+
+.switch {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.switch button {
+  padding: 7px 16px;
+  border-radius: var(--r-pill);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.switch button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* --- переключатель региона (фича 011) ---
+   Стоит отдельно от фильтров и выглядит иначе намеренно: фильтр прячет
+   строки, а регион пересчитывает баллы. Одинаковый вид у двух разных
+   действий читался бы как одно. */
+
+.regions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: var(--gap);
+}
+
+.regions__label {
+  margin-right: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.regions__pill {
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  letter-spacing: 0.06em;
+  color: var(--dim);
+}
+
+.regions__pill[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: none;
+}
+
+/* Где ещё ниша свободна — прямой ответ на «куда идти». */
+.find__free {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  color: var(--lime);
+}
+
+/* --- порядок, фильтры и страницы (FR-034) --- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: var(--gap);
+}
+
+.controls__field {
+  display: grid;
+  gap: 4px;
+}
+
+.controls__label {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  font-stretch: 78%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+
+.controls select {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+}
+
+.controls__count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+}
+
+/* --- поиск с подсказками (дизайн 2026-08-04) ---
+ *
+ * Подсветка совпавшего куска намеренно бесцветная: лайм и розовый заняты
+ * смыслом «ниша свободна / занята», а третьего акцента в палитре нет
+ * (tokens.css). Поэтому кусок выделяется поверхностью и насыщенностью текста,
+ * а не краской.
+ */
+
+.search {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  max-width: 380px;
+  /* Отступ сверху нужен там, где над полем сразу текст: у кандидатов `.runline`
+   * своего нижнего поля не имеет, и подпись прилипала к абзацу вплотную.
+   * У трендов сверху карточка ручного ввода со своим отступом — там просто
+   * становится просторнее. */
+  margin: var(--gap) 0;
+}
+
+.search__field {
+  position: relative;
+  display: flex;
+}
+
+.search__input {
+  width: 100%;
+  padding: 9px 38px 9px 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+}
+
+.search__input::placeholder {
+  color: var(--mut);
+}
+
+.search__clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  translate: 0 -50%;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--dim);
+  font-size: var(--step-1);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.search__clear:hover {
+  background: var(--line);
+  color: var(--ink);
+}
+
+.search__list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: var(--r-sticker);
+  background: var(--card);
+  box-shadow:
+    inset 0 0 0 1px var(--line),
+    0 18px 40px rgb(0 0 0 / 0.45);
+  list-style: none;
+}
+
+.search__option {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+
+.search__option.is-active,
+.search__option:hover {
+  background: var(--skel-tint);
+}
+
+.search__name {
+  color: var(--ink);
+  font-size: var(--step-0);
+}
+
+.search__name mark {
+  padding: 0 2px;
+  border-radius: 4px;
+  background: var(--line);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.search__meta {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+  white-space: nowrap;
+}
+
+/* Догадка обязана выглядеть догадкой — курсив и приглушённый тон отделяют её
+ * от попадания. */
+.search__guess {
+  font-style: italic;
+}
+
+.search__miss,
+.search__near {
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.search__near {
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+}
+
+.search__near a {
+  color: var(--ink);
+}
+
+.search__near--mute {
+  color: var(--mut);
+}
+
+.guess {
+  margin-bottom: var(--gap);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.pager {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--gap);
+}
+
+.pager button {
+  padding: 9px 18px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+}
+
+.pager button[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pager__now {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+}
+
+/* --- кандидаты (FR-021, FR-022) --- */
+/*
+ * Визуально тише трендов и без наклейки с баллом: показателей у кандидата
+ * нет по устройству, и рисовать оценку, которой не существует, нельзя.
+ */
+
+.candidates {
+  display: grid;
+  gap: 10px;
+}
+
+.candidate {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--gap);
+  align-items: center;
+  padding: 16px var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.candidate__main {
+  display: grid;
+  gap: 8px;
+}
+
+.candidate__name {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-stretch: 80%;
+}
+
+.candidate__seen {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+}
+
+/* Рыночный след кандидата (фича 005). Три состояния различаются цветом,
+ * но не только им: текст каждого говорит сам за себя, потому что «не
+ * проверялся» и «свободно» — разные вещи, а не оттенки одного. */
+.candidate__market {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+}
+
+.candidate__market--unknown {
+  color: var(--mut);
+}
+
+.candidate__market--free {
+  color: var(--lime);
+}
+
+.candidate__market--taken {
+  color: var(--pink);
+}
+
+/* Форма ручного ввода тренда (фича 005). Стоит над списком: это действие
+ * про весь раздел, а не про конкретную карточку. */
+.addtrend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: var(--gap);
+  padding: 14px var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.addtrend__field {
+  display: grid;
+  gap: 4px;
+  flex: 1 1 200px;
+}
+
+.addtrend input {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+}
+
+.addtrend button {
+  padding: 10px 20px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--lime);
+  color: var(--lime-ink);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  cursor: pointer;
+}
+
+.addtrend button[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.addtrend__status {
+  flex-basis: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.cta--ghost {
+  background: transparent;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--lime);
+}
+
+.cta--ghost:hover {
+  background: var(--lime);
+  color: var(--lime-ink);
+}
+
+/* --- плитки сводки --- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--gap);
+}
+
+/* На средней ширине auto-fit давал 3 плитки + сироту с дырой в ряд —
+ * держим честные 2×2, как на мобайле. */
+@media (max-width: 1000px) {
+  .tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.tile {
+  padding: var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.tile__value {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 800;
+  font-stretch: 78%;
+  line-height: 1;
+}
+
+.tile__label {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.tile--accent .tile__value {
+  color: var(--lime);
+}
+
+/* --- служебные состояния --- */
+
+.panel {
+  padding: var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.empty {
+  display: grid;
+  gap: 8px;
+  padding: 48px var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+  text-align: center;
+  color: var(--dim);
+}
+
+.empty b {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-stretch: 80%;
+  color: var(--ink);
+}
+
+.alert {
+  padding: 14px var(--pad);
+  border-radius: var(--r-card);
+  background: #241a1f;
+  box-shadow: inset 0 0 0 1px #3a2530;
+  color: #ffc2d9;
+}
+
+.section {
+  margin-top: 34px;
+}
+
+.section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap);
+  margin-bottom: 12px;
+}
+
+.feed {
+  display: grid;
+  gap: 10px;
+}
+
+.feed li {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.feed time {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+  white-space: nowrap;
+}
+
+/* --- заглушка загрузки --- */
+
+/* Форма заглушки: скругление, размеры и сплошной фон — это вёрстка, а не
+   движение, и она обязана оставаться видимой, даже если весь слой
+   motion.css выключен. Само мерцание (градиент, что по нему едет) — там. */
+.skel {
+  border-radius: 8px;
+  background: var(--skel-tint);
+}
+
+.skel--value {
+  width: 60%;
+  height: 34px;
+}
+
+.skel--label {
+  width: 80%;
+  height: 12px;
+  margin-top: 10px;
+}
+
+.skel--title {
+  width: 55%;
+  height: 26px;
+}
+
+.skel--meta {
+  width: 70%;
+  height: 14px;
+  margin-top: 12px;
+}
+
+.skel--bar {
+  width: 90%;
+  height: 14px;
+  margin-top: 16px;
+}
+
+.skel--sticker {
+  width: 74px;
+  height: 62px;
+  border-radius: var(--r-sticker);
+}
+
+.skel--line {
+  width: 100%;
+  height: 14px;
+}
+
+.skel--block {
+  width: 100%;
+}
+
+@media (max-width: 620px) {
+  .find {
+    grid-template-columns: 1fr;
+  }
+
+  .find > .sticker {
+    justify-self: start;
+    order: -1;
+  }
+}
+
+/* --- таблица по регионам на странице тренда (фича 011) --- */
+
+/* Семь колонок в узком окне не помещаются — таблица живёт в .table-wrap
+ * и прокручивается внутри него, а не распирает страницу. */
+.regiontable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+}
+
+.regiontable th {
+  padding: 6px 8px;
+  text-align: left;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dim);
+  border-bottom: 1px solid var(--line);
+}
+
+.regiontable td {
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.regiontable__code {
+  letter-spacing: 0.08em;
+}
+
+/* Состав следа рынка: «RU 46» и под ним «BY 22, KZ 9, UA 6». Опорная страна
+   означает рынок, и без этой строки число спорило бы с блоком «Где замечен»
+   ниже на той же странице, где стоят сырые страны. */
+.regiontable__from {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+}
+
+/* Опорная строка «Весь мир»: отделена от стран двойной чертой, чтобы не
+   читаться шестым регионом, — это ориентир сравнения, а не участник
+   сортировки. */
+.regiontable__world td {
+  border-bottom: 2px solid var(--line);
+}
+
+.regiontable__world .regiontable__code {
+  font-weight: 700;
+  color: var(--ink);
+}
