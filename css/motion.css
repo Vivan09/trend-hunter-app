@@ -1,0 +1,200 @@
+/* Слой движения.
+ *
+ * Подключается последним: удаление одной строки из index.html выключает всю
+ * анимацию, не задевая остальные стили.
+ *
+ * Правило направления: новое приходит снизу. Вбок движется только то, у чего
+ * есть направление-значение — карточка колоды в сторону вердикта. Наклейку
+ * движение не трогает: она единственный громкий элемент макета, и если она
+ * ещё и шевелится, балл перестаёт читаться первым.
+ */
+
+/* --- появление --- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Для SVG: translateY внутри viewBox масштабируется вместе с графиком,
+   поэтому точки и подписи только проявляются. */
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* fill-mode именно backwards, а не both.
+ *
+ * both удерживает конечный кадр навсегда, а конечный кадр здесь неявный —
+ * он берётся из базового стиля элемента. Анимация в каскаде сильнее обычных
+ * объявлений, поэтому у .find перестал бы работать transform: translateY(-2px)
+ * на :hover (components.css:81). backwards держит начальный кадр во время
+ * задержки и ничего не удерживает после — ровно то, что нужно появлению.
+ */
+.rise,
+.rise-list > * {
+  animation: rise var(--t-base) var(--ease) backwards;
+}
+
+/* Лесенка: --i расставляет stagger() из js/motion.js. */
+.rise-list > * {
+  animation-delay: calc(var(--i, 0) * var(--stagger-step));
+}
+
+/* --- заглушки загрузки --- */
+
+/* Форма, скругление и сплошной фон заглушки — в components.css: это вёрстка,
+   а не движение. Здесь только само мерцание — градиент поверх сплошного
+   фона и его сдвиг; components.css подключён раньше, поэтому градиент ляжет
+   поверх solid-фона, когда этот слой включён. */
+.skel {
+  background-image: linear-gradient(90deg, var(--card) 0%, var(--skel-tint) 50%, var(--card) 100%);
+  background-size: 200% 100%;
+  animation: skel-shimmer var(--t-shimmer) linear infinite;
+}
+
+/* Лайма и розового здесь нет намеренно: эти цвета означают «ниша свободна» и
+   «ниша занята», и в заглушке им нечего сообщать. */
+@keyframes skel-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Заглушка не должна мигать. Локальный API отвечает быстро, и вспышка на 40 мс
+   хуже, чем её отсутствие: проявление отложено, и если данные успели прийти,
+   заглушку никто не увидит. */
+.skel-group {
+  animation: rise var(--t-base) var(--ease) var(--skel-delay) backwards;
+  /* Заглушка не интерактивна и не должна отвечать на курсор — без этого она
+     наследует .find:hover { transform: translateY(-2px) } и приподнимается. */
+  pointer-events: none;
+}
+
+/* --- долгая работа --- */
+
+/* Одна из двух зацикленных анимаций интерфейса — вторая это мерцание заглушки.
+   Обе означают незавершённую работу и живут ровно столько, сколько идёт
+   ожидание. Здесь это «работа идёт, не зависло»: генерация идей — единственная
+   операция на сайте, которая занимает десятки секунд. */
+.cta--busy {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta--busy::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Клики не перехватываются: сейчас кнопка на время блика всё равно disabled,
+     но связывать одно с другим не стоит — правило должно держаться само. */
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--lime-ink) 22%, transparent) 50%,
+    transparent 100%
+  );
+  animation: cta-sweep var(--t-sweep) linear infinite;
+}
+
+@keyframes cta-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* --- график --- */
+
+/* Три серии идут одновременно, а не по очереди. Тренд, поиск и конкуренция —
+   параллельные замеры одного периода, и последовательная отрисовка соврала бы,
+   будто одно следует за другим. */
+.chart--draw .chart__line:not(.chart__line--forecast) {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+  animation: draw var(--t-slow) var(--ease) forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Прогноз — отдельным тактом после паузы: пауза показывает, где кончился замер
+   и начался домысел.
+   У линии уже есть собственный пунктир, и анимация dashoffset заставила бы
+   штрихи ползти — визуальная ложь. Маска раскрывает линию слева направо,
+   штрихи стоят на месте. */
+.chart--draw .chart__line--forecast {
+  animation: forecast-reveal var(--t-forecast) var(--ease) var(--t-slow) backwards;
+}
+
+@keyframes forecast-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+/* Точки и прямые подписи приходят последними, когда линии уже легли.
+   Селектор сужен до серий намеренно: точки перекрестия живут в том же svg,
+   и общий `circle` заставлял бы их отыгрывать задержку fade при каждом
+   появлении — перекрестие казалось бы сломанным. */
+.chart--draw .chart__series circle,
+.chart--draw .chart__value {
+  animation: fade var(--t-base) var(--ease) var(--t-slow) backwards;
+}
+
+/* --- колода --- */
+
+/* Единственное движение, где сторона несёт смысл: горизонталь здесь читается
+   как вердикт. Вправо — сохранить, влево — пропустить. (Блик занятой кнопки
+   тоже едет вбок, но он ничего не сообщает направлением.) */
+.deckcard--out-left,
+.deckcard--out-right {
+  animation: deck-out var(--t-base) var(--ease) forwards;
+}
+
+.deckcard--out-left {
+  --dir: -1;
+}
+
+.deckcard--out-right {
+  --dir: 1;
+}
+
+@keyframes deck-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--dir) * 64px)) rotate(calc(var(--dir) * 4deg));
+  }
+}
+
+/* --- отклик на нажатие --- */
+
+/* Идёт последним в файле, а motion.css подключён последним в index.html:
+   так .cta:active перебивает translateY(-1px) из .cta:hover (views.css:90) —
+   у них одинаковая специфичность, решает порядок. */
+.pill:not([disabled]):active,
+.cta:not([disabled]):active,
+.switch button:not([disabled]):active {
+  transform: scale(0.97);
+  transition: transform var(--t-fast) var(--ease);
+}
+
+/* При выключенном движении бегущий блик выродился бы в неподвижное пятно
+   поперёк кнопки — лучше не показывать ничего. */
+@media (prefers-reduced-motion: reduce) {
+  .cta--busy::after {
+    display: none;
+  }
+}
