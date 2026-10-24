@@ -1,0 +1,855 @@
+/* Стили отдельных разделов. Общие детали живут в components.css. */
+
+code {
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: var(--card-3);
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  font-stretch: 78%;
+  color: var(--lime);
+}
+
+#list-hint {
+  max-width: 70ch;
+  margin-bottom: 4px;
+}
+
+.empty p,
+.panel p {
+  max-width: 62ch;
+}
+
+.empty p {
+  margin-inline: auto;
+}
+
+.note {
+  color: var(--dim);
+  font-size: var(--step--1);
+}
+
+.notes {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* --- шапка тренда: имя, пять баллов и кнопка помещаются на первый экран (SC-005) --- */
+
+.trendhead {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--gap);
+  align-items: start;
+  padding: var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.trendhead__name {
+  margin: 6px 0 12px;
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 800;
+  font-stretch: 76%;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.trendhead__side {
+  display: grid;
+  justify-items: end;
+  gap: 14px;
+}
+
+.scorebar--lg {
+  gap: 22px;
+  margin-top: 16px;
+}
+
+.scorebar--lg .metric__value {
+  font-size: var(--step-1);
+}
+
+.cta {
+  padding: 12px 20px;
+  border-radius: var(--r-pill);
+  background: var(--lime);
+  color: var(--lime-ink);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition: transform 0.14s ease, opacity 0.14s ease;
+}
+
+.cta:hover {
+  transform: translateY(-1px);
+}
+
+.cta[disabled] {
+  opacity: 0.55;
+  cursor: progress;
+  transform: none;
+}
+
+.prose p + .eyebrow {
+  margin-top: 16px;
+}
+
+.prose p {
+  margin-top: 4px;
+}
+
+.links {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+}
+
+.links a {
+  color: var(--dim);
+  overflow-wrap: anywhere;
+}
+
+.links a:hover {
+  color: var(--lime);
+}
+
+/* --- график --- */
+
+.chart {
+  position: relative;
+  margin: 0;
+  padding: var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.chart__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.legend li {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+/* Кнопка легенды гасит линию, но остаётся в легенде: скрытая серия обязана
+   быть названной, иначе график молча притворяется двухлинейным. */
+.legend__toggle {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-stretch: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.legend__toggle:hover {
+  color: var(--ink);
+}
+
+.legend__toggle[aria-pressed="false"] {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.legend__mark {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.legend__mark--forecast {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--mut) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+/* Пропорциональное масштабирование: растягивание по одной оси искажает
+   штрихи и подписи, а график читают по толщине линии не меньше, чем по цвету.
+   pan-y оставляет странице вертикальную прокрутку, а горизонтальное ведение
+   пальцем отдаёт перекрестию — иначе на телефоне значения не посмотреть. */
+.chart__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+/* --- перекрестие наведения --- */
+
+.chart__cross-line {
+  stroke: var(--dim);
+  stroke-width: 1;
+}
+
+.chart__cross-dot {
+  pointer-events: none;
+}
+
+.chart__tick {
+  stroke: var(--mut);
+  stroke-width: 1;
+}
+
+.chart__grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.chart__mark {
+  stroke: var(--mut);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.chart__mark--now {
+  stroke: var(--dim);
+}
+
+.chart__line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart__line--forecast {
+  stroke-dasharray: 5 5;
+  opacity: 0.75;
+}
+
+.chart__axis,
+.chart__note,
+.chart__value {
+  fill: var(--mut);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-stretch: 78%;
+}
+
+.chart__value {
+  fill: var(--dim);
+}
+
+.chart__tip {
+  position: absolute;
+  top: 58px;
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #23262c;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 45%);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  pointer-events: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+/* display:grid перебивает [hidden] из таблицы стилей браузера — гасим явно */
+.chart__tip[hidden] {
+  display: none;
+}
+
+.chart__tip i {
+  display: inline-block;
+  width: 10px;
+  height: 3px;
+  margin-right: 7px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+/* Opportunity — производная величина без своей линии: отделена чертой,
+   чтобы не читалась четвёртой серией. */
+.chart__tip-op {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+}
+
+.chart__table {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.chart__table summary {
+  cursor: pointer;
+}
+
+/* --- таблицы --- */
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.table,
+.chart__table table {
+  width: 100%;
+  margin-top: 10px;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+}
+
+.table th,
+.table td,
+.chart__table th,
+.chart__table td {
+  padding: 8px 12px 8px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table th,
+.chart__table th {
+  color: var(--mut);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table a:hover {
+  color: var(--lime);
+}
+
+.market {
+  padding: var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.market .scorebar {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.chips {
+  margin-top: 18px;
+}
+
+.chips .find__meta {
+  margin-top: 8px;
+}
+
+/* --- география --- */
+
+.geo {
+  display: grid;
+  gap: 8px;
+  padding: var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.geo li {
+  display: grid;
+  grid-template-columns: 42px 1fr 42px;
+  gap: 12px;
+  align-items: center;
+}
+
+.geo__code,
+.geo__value {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.geo__value {
+  text-align: right;
+}
+
+/* Из чего сложено число по стране (фича 010): страна автора и регион выдачи —
+ * разные факты, и в одной строке они складываться не должны молча. Уходит на
+ * свою строку под полосой, чтобы не ломать сетку из трёх колонок. */
+.geo__origin {
+  grid-column: 1 / -1;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+}
+
+.geo__bar {
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--card-3);
+  overflow: hidden;
+}
+
+.geo__bar i {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--series-search);
+}
+
+/* --- видео --- */
+
+.videos {
+  display: grid;
+  /* min(…, 100%): auto-fill не умеет сжимать трек ниже минимума,
+     и на экране уже 280px колонка распирала бы страницу. */
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: var(--gap);
+}
+
+.videocard {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.videocard__head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.videocard__author {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-stretch: 80%;
+}
+
+.videocard__author:hover {
+  color: var(--lime);
+}
+
+.videocard__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.videocard__text,
+.videocard__quote {
+  font-size: var(--step--1);
+  color: var(--dim);
+}
+
+.videocard__quote {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--card-3);
+  color: var(--ink);
+}
+
+.videocard__tags,
+.videocard__music {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+  overflow-wrap: anywhere;
+}
+
+/* --- исходные материалы (FR-013, FR-014) --- */
+/*
+ * Список, а не сетка: материалы читают подряд, сверху вниз, и важен порядок
+ * по дате. Карточка нарочно тише видеокарточки — это доказательство, а не
+ * витрина, и она не должна спорить за внимание с показателями тренда.
+ */
+
+.mentions {
+  display: grid;
+  gap: 10px;
+}
+
+.mention {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.mention--expired {
+  opacity: 0.72;
+}
+
+.mention__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.mention__author {
+  font-family: var(--font-display);
+  font-stretch: 80%;
+}
+
+.mention__date,
+.mention__views {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+}
+
+.mention__views {
+  margin-left: auto;
+}
+
+.mention__title {
+  overflow-wrap: anywhere;
+}
+
+.mention__quote {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--card-3);
+  font-size: var(--step--1);
+}
+
+.mention__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--mut);
+  overflow-wrap: anywhere;
+}
+
+/* Тег YouTube — фраза с пробелами, и без границы слова сливаются в кашу */
+.mention__tag {
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+
+.mention__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-size: var(--step--1);
+  color: var(--dim);
+}
+
+/* Фрагмент ровно в том написании, в каком его нашли, — по нему видно,
+   почему обнаружение вообще приняли (правило дословности). */
+.mention__foot .mention__raw {
+  font-family: var(--font-mono);
+  font-stretch: 78%;
+  color: var(--lime);
+}
+
+.mention__foot a {
+  margin-left: auto;
+}
+
+/* --- идеи --- */
+
+.ideas {
+  display: grid;
+  gap: var(--gap);
+}
+
+.idea__title {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-stretch: 80%;
+  margin-bottom: 8px;
+}
+
+.idea p {
+  margin-top: 8px;
+  color: var(--dim);
+}
+
+/* --- колода --- */
+
+.deckcard {
+  display: grid;
+  gap: var(--gap);
+  padding: var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.deckcard__head {
+  /* Страховка от растянутых на всю карточку псевдоэлементов внутри шапки:
+     без позиционированного предка они берут за containing block весь вьюпорт
+     и перекрывают всё, что ниже шапки. Так и было, пока .find__name::after
+     (components.css) цеплялся к заголовку колоды; теперь он сужен до
+     a.find__name, но правило остаётся — цена ему ноль, а грабли известные. */
+  position: relative;
+  display: flex;
+  gap: var(--gap);
+  align-items: start;
+  justify-content: space-between;
+}
+
+/* у колоды свой ритм: отступ уже даёт grid-gap карточки */
+.deckcard .scorebar {
+  margin-top: 0;
+}
+
+.deckcard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.pill {
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  background: var(--card-3);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 80%;
+  color: var(--ink);
+  transition: background 0.14s ease;
+}
+
+.pill:hover {
+  background: #282c33;
+}
+
+.pill--ghost {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--dim);
+}
+
+.pill[disabled] {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+/* --- аналитика --- */
+
+.sparks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: var(--gap);
+}
+
+.spark {
+  margin: 0;
+  padding: 16px;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.spark figcaption {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.spark figcaption a {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-stretch: 80%;
+}
+
+.spark figcaption a:hover {
+  color: var(--lime);
+}
+
+.spark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.spark .scorebar {
+  gap: 14px;
+}
+
+/* --- сохранённое --- */
+
+.saved {
+  display: grid;
+  gap: var(--gap);
+}
+
+.saved__head {
+  display: flex;
+  gap: var(--gap);
+  align-items: start;
+  justify-content: space-between;
+}
+
+.note-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.note-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--card-3);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--step--1);
+  resize: vertical;
+}
+
+.note-field--saved {
+  box-shadow: inset 0 0 0 1px var(--lime);
+}
+
+.note--error {
+  color: var(--pink);
+}
+
+@media (max-width: 720px) {
+  .trendhead,
+  .deckcard__head,
+  .saved__head {
+    grid-template-columns: 1fr;
+  }
+
+  .trendhead__side {
+    justify-items: start;
+  }
+
+  .deckcard__head,
+  .saved__head {
+    flex-direction: column;
+  }
+}
+
+
+/* ── AI-чарт (фича 006) ──────────────────────────────────────────────────
+ * Две колонки на широком экране, одна под другой на узком. Порядок важен:
+ * прогноз по базе идёт первым, потому что он опирается на измеренное,
+ * а гипотезы — только на память модели. */
+.aichart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  gap: var(--gap);
+  align-items: start;
+}
+
+.aichart__col {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.find__scores {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Мнение модели. Форма намеренно другая, чем у наклейки с посчитанным баллом:
+ * заливка — измерено, контур — сказано. Одинаково выглядеть они не должны
+ * никогда, иначе через неделю станут неразличимы. */
+.opinion {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 8px 14px;
+  border-radius: var(--r-card);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--dim);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-stretch: 78%;
+  white-space: nowrap;
+}
+
+.opinion b {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+}
+
+.opinion span {
+  font-size: var(--step--2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mut);
+}
+
+.rejected {
+  padding: 12px var(--pad);
+  border-radius: var(--r-card);
+  background: var(--card-2);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-stretch: 78%;
+  color: var(--dim);
+}
+
+.rejected summary {
+  cursor: pointer;
+  color: var(--mut);
+}
+
+.rejected ul {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+  padding-left: 18px;
+}
