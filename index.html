@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Trend Hunter</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23121316'/%3E%3Crect x='5' y='7' width='22' height='18' rx='6' fill='%23C7F04A' transform='rotate(-2.5 16 16)'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/views.css" />
+    <link rel="stylesheet" href="css/motion.css" />
+    <link rel="stylesheet" href="css/chromeglass.css" />
+    <link
+      rel="preload"
+      href="fonts/BricolageGrotesque.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+      <link rel="stylesheet" href="css/miniapp.css" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+  <body>
+    <!-- Шапка живёт вне .shell: её фон и кромка тянутся на всю ширину окна,
+         а контент внутри выравнивает тот же .shell на строке. -->
+    <header class="topbar">
+      <div class="shell topbar__row">
+        <a class="wordmark" href="#/">TREND<span>·</span>HUNTER</a>
+        <nav class="nav" aria-label="Разделы">
+          <a href="#/">Обзор</a>
+          <a href="#/trends">Тренды</a>
+          <a href="#/candidates">Кандидаты</a>
+          <a href="#/ai">AI-чарт</a>
+          <a href="#/deck">Разбор</a>
+          <a href="#/mygames">Мои игры</a>
+          <a href="#/analytics">Аналитика</a>
+          <a href="#/workspace">Сохранённое</a>
+          <a href="#/notifications">Журнал</a>
+        </nav>
+      </div>
+    </header>
+    <div class="shell">
+      <main id="view" tabindex="-1"></main>
+    </div>
+    <script type="module" src="js/main.js"></script>
+      <script type="module" src="js/miniapp.js"></script>
+</body>
+</html>
